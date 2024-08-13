@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Flag Hosting Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevents scrollbars from appearing during confetti animation */
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        h1 {
+            color: #1e90ff;
+        }
+
+        .flag-pole {
+            position: relative;
+            height: 300px;
+            width: 5px; /* Slimmer pole */
+            margin: 0 auto;
+            background-color: #000; /* Changed from border to background-color for the pole */
+        }
+
+        .flag {
+            position: absolute;
+            bottom: 0; /* Start the flag at the bottom of the pole */
+            left: 0; /* Move flag closer to the pole */
+            width: 150px; /* Flag width */
+            transition: bottom 2s ease-in-out;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #1e90ff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #4682b4;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #ff4500;
+        }
+
+        .name-input {
+            margin-top: 20px;
+            position: relative;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 1em;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #wish-letter {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: #ff4500;
+            font-weight: bold;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.3);
+            animation: flyAround 10s linear infinite;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes flyAround {
+            0% {
+                transform: translate(-50%, -50%) rotateY(0deg);
+            }
+            25% {
+                transform: translate(-50%, -50%) translateX(100px) rotateY(90deg);
+            }
+            50% {
+                transform: translate(-50%, -50%) translateY(100px) rotateY(180deg);
+            }
+            75% {
+                transform: translate(-50%, -50%) translateX(-100px) rotateY(270deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotateY(360deg);
+            }
+        }
+
+        .floating-icon {
+            display: none; /* Hidden by default, shown after flag hosting */
+            position: absolute;
+            width: 100px; /* Adjust the size of the icon */
+            height: 100px; /* Adjust the size of the icon */
+            background-image: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg84FPt2yjJLsveGjolUKNa9DbjHzwUZPweg179X0K2Il9XYmKOSsp1L2bA1U9CvfRYGT45RS8AsEHBPhewuYpZViAcR12pjka_jJfbMoYNuvORxwrfPbLZBRLIXXoPElZBqCSlRD3bZXmdlu4HqGKG6VM-7LP_E9JtBNz917cRCd50miumuIw_obVzqE0/s320/icon.gif'); /* Replace with your icon URL */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 10;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Hidden do-follow link */
+        .hidden-link {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Independence Day Flag Hosting Game</h1>
+        <div class="flag-pole">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi29uqGuE3tDMKSe28MCtRFWj7qUtwugTwXekmSWGigUbrC2mp2pnK3xp6GYgoq97GUMfBFeOn7tBoZrfuA6SFx32YmBtZNtU3_7P0VCEjPjHFmM2UbID7HDNVL-f51DuznFzDVbDgWE2sHVipD8624MU1oXhKHZTd7F2touazn9NpNuhl0QQdIqLWX1M0/s320/flag.webp" alt="Indian Flag" class="flag" id="flag">
+        </div>
+        <button id="host-btn">Host the Flag</button>
+        <div id="message"></div>
+        <div class="floating-icon" id="floating-icon" aria-hidden="true"></div>
+        <div id="wish-letter" aria-live="polite">
+            <p>Happy Independence Day! 🇮🇳</p>
+        </div>
+
+        <div class="name-input" id="name-section" style="display: none;">
+            <input type="text" id="name-input" placeholder="Enter your friend's name">
+            <button id="wish-friend-btn">Wish Your Friend & Share on WhatsApp</button>
+        </div>
+        
+        <!-- Hidden do-follow link -->
+        <a href="https://ddlg.in/" class="hidden-link" id="hidden-link">Do Follow</a>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const flag = document.getElementById('flag');
+            const hostButton = document.getElementById('host-btn');
+            const message = document.getElementById('message');
+            const nameInput = document.getElementById('name-input');
+            const wishFriendButton = document.getElementById('wish-friend-btn');
+            const nameSection = document.getElementById('name-section');
+            const wishLetter = document.getElementById('wish-letter');
+            const floatingIcon = document.getElementById('floating-icon');
+            const hiddenLink = document.getElementById('hidden-link');
+
+            // Check integrity of hidden link
+            if (hiddenLink.href !== 'https://ddlg.in/') {
+                alert('Code integrity compromised!');
+                document.body.innerHTML = ''; // Collapse the code by clearing the body
+                return;
+            }
+
+            function showFlagHostingEffect(name = '') {
+                flag.style.bottom = '200px'; // Raise the flag
+                message.innerText = '🎉 The Indian flag is hosted! 🎉';
+                hostButton.disabled = true; // Disable the button after hosting
+                nameSection.style.display = 'block'; // Show the name input section
+                wishLetter.style.display = 'block'; // Show the wish letter
+                floatingIcon.style.display = 'block'; // Show the floating icon
+                if (name) {
+                    wishLetter.innerHTML = `Happy Independence Day, <strong>${name}</strong>! 🇮🇳`;
+                } else {
+                    wishLetter.innerHTML = 'Happy Independence Day! 🇮🇳';
+                }
+                positionFloatingIcon();
+                let confettiCount = 0;
+                const intervalId = setInterval(() => {
+                    triggerConfetti();
+                    confettiCount++;
+                    if (confettiCount >= 3) {
+                        clearInterval(intervalId);
+                    }
+                }, 1000);
+            }
+
+            function positionFloatingIcon() {
+                const nameInputRect = nameInput.getBoundingClientRect();
+                floatingIcon.style.top = `${nameInputRect.bottom + 10}px`;
+                floatingIcon.style.left = `${nameInputRect.left + (nameInputRect.width / 2) - 25}px`;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const wishName = urlParams.get('name');
+            if (wishName) {
+                showFlagHostingEffect(wishName);
+            }
+
+            hostButton.addEventListener('click', () => {
+                showFlagHostingEffect();
+            });
+
+            wishFriendButton.addEventListener('click', () => {
+                const name = nameInput.value.trim();
+                if (name) {
+                    const encodedName = encodeURIComponent(name);
+                    const whatsappMessage = `Happy Independence Day, ${name}! 🎉🇮🇳 Check out this awesome flag hosting game: https://yourwebsite.com?name=${encodedName}`;
+                    const whatsappURL = `https://wa.me/?text=${whatsappMessage}`;
+                    window.location.href = whatsappURL; // Redirects immediately to WhatsApp
+                } else {
+                    alert('Please enter your friend\'s name.');
+                }
+            });
+
+            function triggerConfetti() {
+                confetti();
+            }
+        });
+    </script>
+</body>
+</html>
